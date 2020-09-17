@@ -6,6 +6,9 @@
 import sys
 import data_preprocess
 import train_test_split
+import numpy as np
+import matplotlib as plt
+import pandas as pd
 
 
 def main(path):
