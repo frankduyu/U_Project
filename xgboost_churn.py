@@ -11,7 +11,7 @@ import xgboost_explainer as xgb_exp
 import model_validation
 
 
-def xgboost_churn(train_data, train_label, test_data, test_label):
+def xgboost_churn(X_train, y_train, X_test, y_test):
     # load conf
     name = "xgboost_churn"
     fea_path = "conf/u_plan_train_conf"
@@ -24,7 +24,7 @@ def xgboost_churn(train_data, train_label, test_data, test_label):
     real_fea_names = col_names[2:]
 
     # model training
-    dtrain = xgb.DMatrix(train_data, train_label)
+    dtrain = xgb.DMatrix(X_train, y_train)
     lmda = 1.0
     params = {"objective": "binary:logistic", "max_depth": 6, "eta": 0.3, "gamma": 1,
               "colsample_bytree": 0.8, "min_child_weight": 2, "subsample": 0.8}
@@ -32,9 +32,9 @@ def xgboost_churn(train_data, train_label, test_data, test_label):
     bst = xgb.train(params, dtrain, best_iteration)
 
     # model validation
-    dtest = xgb.DMatrix(test_data)
+    dtest = xgb.DMatrix(X_test)
     y_pred = bst.predict(dtest)
-    accu_scr, prec_scr, rec_scr, f1_scr = model_validation.model_valid(test_label, y_pred)
+    accu_scr, prec_scr, rec_scr, f1_scr = model_validation.model_valid(y_test, y_pred)
 
     print("xgboost模型准确率 : " + str(accu_scr))
     print("xgboost模型精确率 : " + str(prec_scr))
@@ -76,7 +76,7 @@ def xgboost_churn(train_data, train_label, test_data, test_label):
     for i in range(len(top_20_f)):
         fea = top_20_f[i]
         idx = real_fea_names.index(fea)
-        fea_data = train_data[fea].values
+        fea_data = X_train[fea].values
         ax = fig.add_subplot(5, 4, i+1)
         ax.set_xscale('log')
         ax.set_xlim(min([i for i in fea_data if i > 0]), max(fea_data))
