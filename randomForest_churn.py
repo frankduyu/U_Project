@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 import model_validation
 
 
-def xgboost_churn(X_train, y_train, X_test, y_test):
+def random_forest_churn(X_train, y_train, X_test, y_test):
     # 构建模型
     estimator_RF = RandomForestClassifier(n_estimators=100, random_state=9, n_jobs=-1)
     # 拟合
