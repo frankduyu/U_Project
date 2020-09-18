@@ -7,6 +7,7 @@
 
 import pandas as pd
 import data_preprocess
+import numpy as np
 import xgboost_churn
 import lightGBM_churn
 import randomForest_churn
@@ -17,7 +18,10 @@ def main(path):
     churn_raw_data = pd.read_csv(path)
 
     # preprocessing data
-    X_train, y_train, X_test, y_test = data_preprocess.preprocess(churn_raw_data)
+    X_train, X_test, y_train, y_test = data_preprocess.preprocess(churn_raw_data)
+
+    y_train = np.array(y_train)
+    y_test = np.array(y_test)
 
     # xgboost model training
     xgboost_churn.xgboost_churn(X_train, y_train, X_test, y_test)
@@ -30,5 +34,5 @@ def main(path):
 
 
 if __name__ == '__main__':
-    data_path = "data/cell2celltrain.csv"
+    data_path = "./data/cell2celltrain.csv"
     main(data_path)
