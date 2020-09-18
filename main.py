@@ -8,6 +8,8 @@
 import pandas as pd
 import data_preprocess
 import xgboost_churn
+import lightGBM_churn
+import randomForest_churn
 
 
 def main(path):
@@ -17,9 +19,14 @@ def main(path):
     # preprocessing data
     X_train, y_train, X_test, y_test = data_preprocess.preprocess(churn_raw_data)
 
-    # # model training
-    # # xgb model training
+    # xgboost model training
     xgboost_churn.xgboost_churn(X_train, y_train, X_test, y_test)
+
+    # lightGBM model training
+    lightGBM_churn.lightGBM_churn(X_train, y_train, X_test, y_test)
+
+    # randomForest model training
+    randomForest_churn.random_forest_churn(X_train, y_train, X_test, y_test)
 
 
 if __name__ == '__main__':
