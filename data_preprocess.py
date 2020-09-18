@@ -4,11 +4,82 @@
 @author:Xinlei Ma, Liye Peng
 @description: preprocessing raw data
 """
-import pandas as pd
 import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.externals import joblib
+import gc
+
+
+base_dir = './'
+base_model_dir = base_dir + 'models/'
+base_result_dir = base_dir + 'result/'
+
+
+def mulit_onehot_encoder(df, columns, isPredict):
+    '''
+    one-hot编码
+    :param df:
+    :param columns:
+    :param isPredict: 是否是进行预测，如果是预测的话，直接使用模型，否则训练模型，并将模型结果保存成文件
+    :return:
+    '''
+    if isPredict:
+        for column_name in columns:
+            # 加载encoder
+            Enc_label = joblib.load(base_model_dir + column_name +
+                                    ".label_encoder")
+            Enc_ohe = joblib.load(base_model_dir + column_name +
+                                  ".onehot_encoder")
+
+            df['Dummies'] = Enc_label.transform(df[column_name])
+
+            df_dummies = pd.DataFrame(Enc_ohe.transform(
+                df[["Dummies"]]).todense(), columns=Enc_label.classes_)
+            df_dummies.rename(columns=lambda x: column_name +
+                                                "_" + x, inplace=True)  # 重新命名
+            df = pd.concat([df, df_dummies], axis=1)
+        df.drop(["Dummies"], axis=1, inplace=True)
+        df.drop(columns, axis=1, inplace=True)
+    else:
+        Enc_ohe, Enc_label = OneHotEncoder(), LabelEncoder()
+        for column_name in columns:
+            Enc_label.fit(df[column_name])
+            joblib.dump(Enc_label, base_model_dir + column_name +
+                        ".label_encoder")
+            df['Dummies'] = Enc_label.transform(df[column_name])
+            Enc_ohe.fit(df[["Dummies"]])
+            joblib.dump(Enc_ohe, base_model_dir + column_name +
+                        ".onehot_encoder")
+
+            df_dummies = pd.DataFrame(Enc_ohe.transform(
+                df[["Dummies"]]).todense(), columns=Enc_label.classes_)
+            df_dummies.rename(columns=lambda x: column_name +
+                                                "_" + x, inplace=True)  # 重新命名
+            df = pd.concat([df, df_dummies], axis=1)
+        df.drop(["Dummies"], axis=1, inplace=True)
+        df.drop(columns, axis=1, inplace=True)
+    gc.collect()
+    return df
 
 
 def preprocess(churn_data_df):
+    data_path = "./data/cell2celltrain.csv"
+    churn_data_df = pd.read_csv(data_path)  # 读取数据为df
+    churn_data_df.head()
+
+    # from fancyimpute import KNN
+
+    churn_data_df.fillna(method='ffill', inplace=True)
+
+    # churn_data_df = KNN(k = 3).complete(churn_data_df)
+
+    # churn_data_df.tail(10)
+    # print(churn_data_df.isnull().values.any())
+    # # 计算相关系数，结果：无强相关性
+    # churn_data_df.corr()
+
     # 所有的值为Yes/No的列，都改成 0/1
     churn_data_df['Churn'] = churn_data_df['Churn'].map(dict(Yes=1, No=0))
     churn_data_df['ChildrenInHH'] = churn_data_df['ChildrenInHH'].map(dict(Yes=1, No=0))
@@ -16,6 +87,7 @@ def preprocess(churn_data_df):
     churn_data_df['HandsetWebCapable'] = churn_data_df['HandsetWebCapable'].map(dict(Yes=1, No=0))
     churn_data_df['TruckOwner'] = churn_data_df['TruckOwner'].map(dict(Yes=1, No=0))
     churn_data_df['RVOwner'] = churn_data_df['RVOwner'].map(dict(Yes=1, No=0))
+    churn_data_df['Homeownership'] = churn_data_df['Homeownership'].map(dict(Known=1, Unknown=0))
     churn_data_df['BuysViaMailOrder'] = churn_data_df['BuysViaMailOrder'].map(dict(Yes=1, No=0))
     churn_data_df['RespondsToMailOffers'] = churn_data_df['RespondsToMailOffers'].map(dict(Yes=1, No=0))
     churn_data_df['OptOutMailings'] = churn_data_df['OptOutMailings'].map(dict(Yes=1, No=0))
@@ -26,40 +98,40 @@ def preprocess(churn_data_df):
     churn_data_df['NotNewCellphoneUser'] = churn_data_df['NotNewCellphoneUser'].map(dict(Yes=1, No=0))
     churn_data_df['OwnsMotorcycle'] = churn_data_df['OwnsMotorcycle'].map(dict(Yes=1, No=0))
     churn_data_df['MadeCallToRetentionTeam'] = churn_data_df['MadeCallToRetentionTeam'].map(dict(Yes=1, No=0))
-    churn_data_df['MaritalStatus'] = churn_data_df['MaritalStatus'].map(dict(Yes=1, No=0))
+    churn_data_df['MaritalStatus'] = churn_data_df['MaritalStatus'].map(dict(Yes=1, No=0, Unknown=-1))
 
-    # 将CreditRating这一列处理成只有数值的
+    churn_data_df['HandsetPrice'] = churn_data_df['HandsetPrice'].replace('Unknown', 30)
+
     churn_data_df[['CreditRating_num', 'CreditRating_str']] = churn_data_df['CreditRating'].str.split('-', expand=True)
+    churn_data_df['CreditRating'] = churn_data_df['CreditRating_num']
 
-    # 删除 customerid 列
-    churn_data_df.drop('CustomerID', axis=1, inplace=True)
-    # 删除 creditRating_str & creditRating 列
-    churn_data_df.drop(['CreditRating_str', 'CreditRating'], axis=1, inplace=True)
+    churn_data_df['ServiceArea'] = churn_data_df['ServiceArea'].str[-3:]
 
-    # 将 credictRating_num 列转换为数值型
-    churn_data_df[['CreditRating_num']] = churn_data_df[['CreditRating_num']].apply(pd.to_numeric)
+    churn_data_df['PrizmCode'] = churn_data_df['PrizmCode'].map(dict(Other=0, Rural=1, Suburban=2, Town=3))
+    churn_data_df['Occupation'] = churn_data_df['Occupation'].map(
+        dict(Clerical=0, Crafts=1, Homemaker=2, Other=3, Professional=4, Retired=5, Self=6, Student=7))
 
-    # # 看有Unknown的列及其占比
-    # for i in churn_data_df.keys():
-    #     t = round(len([x for x in churn_data_df[i] if x == 'Unknown']) / churn_data_df.shape[0], 3)
-    #     if t > 0:
-    #         print(i + ": ", t)
-    #
-    # # HandsetPrice 列的组成部分
-    # print(churn_data_df['HandsetPrice'].value_counts())
-    #
-    # # Homeownership 列的组成部分
-    # print(churn_data_df['Homeownership'].value_counts())
-    #
-    # # 每列 missing value 的个数
-    # for i in churn_data_df.keys():
-    #     t = sum([x for x in churn_data_df[i].isna() if x == True])
-    #     if t > 0:
-    #         print(i + ': ', t)
-    #
-    # # 计算所有特征与标签的相关系数，如强相关则删除该列
-    # num_features = churn_data_df.select_dtypes(include=[np.number])
-    # corr = num_features.corr()
-    # print(corr)
+    df_one_hot = churn_data_df[['PrizmCode', 'Occupation']].astype(str)
 
+    df_one_hot = mulit_onehot_encoder(df_one_hot, ['PrizmCode', 'Occupation'], isPredict=0)
 
+    churn_data_df.drop(['CreditRating_num', 'CreditRating_str'], axis=1, inplace=True)
+
+    churn_data_df.drop(['PrizmCode', 'Occupation'], axis=1, inplace=True)
+
+    churn_data_df = churn_data_df.astype(int)
+
+    churn_data = churn_data_df.drop(['CustomerID', 'Churn'], axis=1, inplace=False)
+
+    churn_data2 = churn_data.iloc[:, :54].apply(lambda x: (x - np.min(x)) / (np.max(x) - np.min(x)))
+
+    df_result = pd.concat([churn_data2, df_one_hot], axis=1)
+
+    df_result = pd.concat([churn_data_df['Churn'], df_result], axis=1)
+
+    # 切分测试集与训练集
+    y = df_result['Churn']
+    X = df_result.drop(['Churn'], axis=1)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, random_state=123)
+
+    return X_train, X_test, y_train, y_test
