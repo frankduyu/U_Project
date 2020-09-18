@@ -8,7 +8,7 @@
 import xgboost as xgb
 import matplotlib.pyplot as plt
 import xgboost_explainer as xgb_exp
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import model_validation
 
 
 def xgboost_churn(train_data, train_label, test_data, test_label):
@@ -34,10 +34,7 @@ def xgboost_churn(train_data, train_label, test_data, test_label):
     # model validation
     dtest = xgb.DMatrix(test_data)
     y_pred = bst.predict(dtest)
-    accu_scr = accuracy_score(test_label, y_pred)
-    prec_scr = precision_score(test_label, y_pred)
-    rec_scr = recall_score(test_label, y_pred)
-    f1_scr = f1_score(test_label, y_pred)
+    accu_scr, prec_scr, rec_scr, f1_scr = model_validation.model_valid(test_label, y_pred)
 
     print("xgboost模型准确率 : " + str(accu_scr))
     print("xgboost模型精确率 : " + str(prec_scr))
@@ -50,8 +47,9 @@ def xgboost_churn(train_data, train_label, test_data, test_label):
     for k, v in importance_score_dict.items():
         importance_score_list.append((v, int(k[1:])))
     importance_score_list = sorted(importance_score_list, key=lambda x: x[0], reverse=True)
-    for i in range(len(importance_score_list)):
-        print(real_fea_names[importance_score_list[i][1]] + '\t' + str(importance_score_list[i][0]))
+    # # print top20 importance features
+    # for i in range(len(importance_score_list)):
+    #     print(real_fea_names[importance_score_list[i][1]] + '\t' + str(importance_score_list[i][0]))
     top_20_f = []
     for i in range(20):
         top_20_f.append(real_fea_names[importance_score_list[i][1]])
