@@ -5,11 +5,9 @@
 @description: U Plan final project Main Function
 """
 
-import sys
-import data_preprocess
-import numpy as np
-import matplotlib as plt
 import pandas as pd
+import data_preprocess
+import xgboost_churn
 
 
 def main(path):
@@ -20,7 +18,8 @@ def main(path):
     X_train, y_train, X_test, y_test = data_preprocess.preprocess(churn_raw_data)
 
     # # model training
-    # xgb_pred_label =
+    # # xgb model training
+    xgboost_churn.xgboost_churn(X_train, y_train, X_test, y_test)
 
 
 if __name__ == '__main__':
