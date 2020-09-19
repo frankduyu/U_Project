@@ -10,6 +10,7 @@ import data_preprocess
 import xgboost_churn
 import lightGBM_churn
 import randomForest_churn
+import dnn_churn
 
 
 def main(path):
@@ -28,6 +29,9 @@ def main(path):
     # randomForest model training
     randomForest_churn.random_forest_churn(X_train, y_train, X_test, y_test)
 
+    # 测试中
+    # DNN model training
+    dnn_churn.dnn_churn(X_train, y_train, X_test, y_test)
 
 if __name__ == '__main__':
     data_path = "./data/cell2celltrain.csv"
