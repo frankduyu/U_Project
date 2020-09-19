@@ -4,8 +4,6 @@
 @author:Zhe Han
 @description: random forest churn prediction
 """
-
-import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 import model_validation
 

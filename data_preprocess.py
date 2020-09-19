@@ -94,34 +94,25 @@ def preprocess(churn_data_df):
     churn_data_df['OwnsMotorcycle'] = churn_data_df['OwnsMotorcycle'].map(dict(Yes=1, No=0))
     churn_data_df['MadeCallToRetentionTeam'] = churn_data_df['MadeCallToRetentionTeam'].map(dict(Yes=1, No=0))
     churn_data_df['MaritalStatus'] = churn_data_df['MaritalStatus'].map(dict(Yes=1, No=0, Unknown=-1))
-
     churn_data_df['HandsetPrice'] = churn_data_df['HandsetPrice'].replace('Unknown', 30)
 
     churn_data_df[['CreditRating_num', 'CreditRating_str']] = churn_data_df['CreditRating'].str.split('-', expand=True)
     churn_data_df['CreditRating'] = churn_data_df['CreditRating_num']
-
     churn_data_df['ServiceArea'] = churn_data_df['ServiceArea'].str[-3:]
 
     churn_data_df['PrizmCode'] = churn_data_df['PrizmCode'].map(dict(Other=0, Rural=1, Suburban=2, Town=3))
     churn_data_df['Occupation'] = churn_data_df['Occupation'].map(
         dict(Clerical=0, Crafts=1, Homemaker=2, Other=3, Professional=4, Retired=5, Self=6, Student=7))
-
     df_one_hot = churn_data_df[['PrizmCode', 'Occupation']].astype(str)
-
     df_one_hot = mulit_onehot_encoder(df_one_hot, ['PrizmCode', 'Occupation'], isPredict=0)
 
     churn_data_df.drop(['CreditRating_num', 'CreditRating_str'], axis=1, inplace=True)
-
     churn_data_df.drop(['PrizmCode', 'Occupation'], axis=1, inplace=True)
-
     churn_data_df = churn_data_df.astype(int)
-
     churn_data = churn_data_df.drop(['CustomerID', 'Churn'], axis=1, inplace=False)
 
     churn_data2 = churn_data.iloc[:, :54].apply(lambda x: (x - np.min(x)) / (np.max(x) - np.min(x)))
-
     df_result = pd.concat([churn_data2, df_one_hot], axis=1)
-
     df_result = pd.concat([churn_data_df['Churn'], df_result], axis=1)
 
     # 类别均衡处理
