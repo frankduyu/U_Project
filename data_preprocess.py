@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.externals import joblib
 import gc
+from imblearn.over_sampling import SMOTE
 
 
 base_dir = './'
@@ -69,16 +70,10 @@ def preprocess(churn_data_df):
     churn_data_df = pd.read_csv(data_path)  # 读取数据为df
     churn_data_df.head()
 
-    # from fancyimpute import KNN
-
     churn_data_df.fillna(method='ffill', inplace=True)
 
-    # churn_data_df = KNN(k = 3).complete(churn_data_df)
-
-    # churn_data_df.tail(10)
-    # print(churn_data_df.isnull().values.any())
-    # # 计算相关系数，结果：无强相关性
-    # churn_data_df.corr()
+    # 计算相关系数，结果：无强相关性
+    churn_data_df.corr()
 
     # 所有的值为Yes/No的列，都改成 0/1
     churn_data_df['Churn'] = churn_data_df['Churn'].map(dict(Yes=1, No=0))
@@ -129,9 +124,17 @@ def preprocess(churn_data_df):
 
     df_result = pd.concat([churn_data_df['Churn'], df_result], axis=1)
 
-    # 切分测试集与训练集
+    # 类别均衡处理
     y = df_result['Churn']
     X = df_result.drop(['Churn'], axis=1)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, random_state=123)
+    # 建立模型
+    smote_model = SMOTE()
+    # 进行过抽样处理
+    X_smote, y_smote = smote_model.fit_sample(X, y)
+    # # 将特征值和目标值组合成一个DataFrame
+    # smote_df = pd.concat([X_smote, y_smote], axis=1)
+
+    # 切分测试集与训练集
+    X_train, X_test, y_train, y_test = train_test_split(X_smote, y_smote, test_size=.2, random_state=123)
 
     return X_train, X_test, y_train, y_test
