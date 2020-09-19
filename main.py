@@ -33,6 +33,7 @@ def main(path):
     # DNN model training
     dnn_churn.dnn_churn(X_train, y_train, X_test, y_test)
 
+
 if __name__ == '__main__':
     data_path = "./data/cell2celltrain.csv"
     main(data_path)

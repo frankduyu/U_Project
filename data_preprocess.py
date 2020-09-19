@@ -128,4 +128,8 @@ def preprocess(churn_data_df):
     # 切分测试集与训练集
     X_train, X_test, y_train, y_test = train_test_split(X_smote, y_smote, test_size=.2, random_state=123)
 
+    # print(np.array(X_train).shape)
+    print(type(y_train))
+    print(y_train)
+
     return X_train, X_test, y_train, y_test
