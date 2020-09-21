@@ -50,22 +50,22 @@ def dnn_churn(train_x, train_y, test_x, test_y):
 	fpr, tpr, thresholds = roc_curve(test_y_copy, y_pred_proba[:, 1])
 	roc_auc = auc(fpr, tpr)
 
-	# model validation plot
-	import matplotlib.pyplot as plt
-	train_loss_history = history.history['loss']
-	val_loss_history = history.history['val_loss']
-
-	train_acc_history = history.history['accuracy']
-	val_acc_history = history.history['val_accuracy']
-
+	# # model validation plot
+	# import matplotlib.pyplot as plt
+	# train_loss_history = history.history['loss']
+	# val_loss_history = history.history['val_loss']
+	#
+	# train_acc_history = history.history['accuracy']
+	# val_acc_history = history.history['val_accuracy']
+	#
 	# outputFileFolder = "./data_" + method + "/"
 	# if not os.path.exists(outputFileFolder):
 	#     os.makedirs(outputFileFolder)
-
-	# save data
-	nx = len(train_loss_history)
-	epochs = [i for i in range(len(train_loss_history))]
-
+	#
+	# # save data
+	# nx = len(train_loss_history)
+	# epochs = [i for i in range(len(train_loss_history))]
+	#
 	# loss_vs_epoch = []
 	# loss_vs_epoch.append(epochs)
 	# loss_vs_epoch.append(train_loss_history)
