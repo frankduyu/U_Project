@@ -7,6 +7,7 @@
 
 import lightgbm as lgb
 import model_validation
+from sklearn.metrics import roc_curve, auc
 
 
 def lightGBM_churn(X_train, y_train, X_test, y_test):
@@ -19,9 +20,16 @@ def lightGBM_churn(X_train, y_train, X_test, y_test):
     lgb_churn_model = lgb_model.fit(X_train, y_train, eval_metric='auc',
                                     eval_set=[(X_test, y_test)], early_stopping_rounds=100)
     y_pred = lgb_churn_model.predict(X_test)
+    y_pred_proba = lgb_churn_model.predict_proba(X_test)
     accu_scr, prec_scr, rec_scr, f1_scr = model_validation.model_valid(y_test, y_pred)
 
     print("lightGBM模型准确率 : " + str(accu_scr))
     print("lightGBM模型精确率 : " + str(prec_scr))
     print("lightGBM模型召回率 : " + str(rec_scr))
     print("lightGBM模型F1 score : " + str(f1_scr))
+
+    # generate roc
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba[:, 1])
+    roc_auc = auc(fpr, tpr)
+
+    return fpr, tpr, roc_auc
