@@ -19,13 +19,13 @@ base_result_dir = base_dir + 'result/'
 
 
 def mulit_onehot_encoder(df, columns, isPredict):
-    '''
+    """
     one-hot编码
     :param df:
     :param columns:
     :param isPredict: 是否是进行预测，如果是预测的话，直接使用模型，否则训练模型，并将模型结果保存成文件
     :return:
-    '''
+    """
     if isPredict:
         for column_name in columns:
             # 加载encoder

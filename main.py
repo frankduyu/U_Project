@@ -22,11 +22,10 @@ def main(path):
 
     # preprocessing data
     X_train, X_test, y_train, y_test = data_preprocess.preprocess(churn_raw_data)
-    print(X_train.shape)
 
-    # # xgboost model training
-    # xgb_fpr, xgb_tpr, xgb_roc_auc = xgboost_churn.xgboost_churn(X_train, y_train, X_test, y_test)
-    #
+    # xgboost model training
+    xgb_fpr, xgb_tpr, xgb_roc_auc = xgboost_churn.xgboost_churn(X_train, y_train, X_test, y_test)
+
     # # lightGBM model training
     # gbm_fpr, gbm_tpr, gbm_roc_auc = lightGBM_churn.lightGBM_churn(X_train, y_train, X_test, y_test)
     #
