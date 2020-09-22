@@ -20,7 +20,7 @@ def random_forest_churn(X_train, y_train, X_test, y_test):
             col_names.append(line)
 
     # model construction
-    estimator_RF = RandomForestClassifier(n_estimators=116, max_depth=18, max_features=10, random_state=0, n_jobs=-11)
+    estimator_RF = RandomForestClassifier(n_estimators=116, max_depth=18, max_features=10, random_state=0, n_jobs=-1)
 
     # model training
     model_RF = estimator_RF.fit(X_train, y_train)
